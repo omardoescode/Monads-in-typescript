@@ -1,4 +1,5 @@
 import { Monad } from "./Monad";
+import { Option } from "./Option";
 
 export abstract class Either<L, R> implements Monad<R, Either<L, R>> {
   abstract bind<T>(func: (value: R) => Either<L, T>): Either<L, T>;
@@ -8,6 +9,7 @@ export abstract class Either<L, R> implements Monad<R, Either<L, R>> {
   }): D;
   abstract getOrElse(defaultValue: R): R;
   abstract orElse(fallback: () => Either<L, R>): Either<L, R>;
+  abstract ensure(left: L): (func: (value: R) => boolean) => Either<L, R>;
 
   map<T>(func: (value: R) => T): Either<L, T> {
     return this.bind((value) => Either.asRight(func(value)));
@@ -18,6 +20,13 @@ export abstract class Either<L, R> implements Monad<R, Either<L, R>> {
   }
   static asLeft<L, R>(value: L): Either<L, R> {
     return new Left<L, R>(value);
+  }
+
+  static fromOption<L, R>(opt: Option<R>, left: L): Either<L, R> {
+    return opt.match({
+      ifSome: Either.asRight,
+      ifNone: () => Either.asLeft(left),
+    });
   }
 }
 
@@ -37,6 +46,10 @@ export class Right<L, R> extends Either<L, R> {
   orElse(_fallback: () => Either<L, R>): Either<L, R> {
     return this;
   }
+
+  ensure(left: L): (predicate: (value: R) => boolean) => Either<L, R> {
+    return (predicate) => (predicate(this.value) ? this : new Left(left));
+  }
 }
 
 export class Left<L, R> extends Either<L, R> {
@@ -54,6 +67,9 @@ export class Left<L, R> extends Either<L, R> {
   }
   orElse(fallback: () => Either<L, R>): Either<L, R> {
     return fallback();
+  }
+  ensure(left: L): (predicate: (value: R) => boolean) => Either<L, R> {
+    return (_predicate) => this;
   }
 }
 
