@@ -7,6 +7,7 @@ export abstract class Option<A> implements Monad<A, Option<any>> {
   map<B>(func: (value: A) => B): Option<B> {
     return this.bind((value: A) => Option.pure(func(value)));
   }
+
   static pure<A>(value: A): Option<A> {
     return new Some(value);
   }
