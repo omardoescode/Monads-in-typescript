@@ -1,6 +1,6 @@
-import { Monad } from "./Monad";
+import Monad from "./Monad";
 
-export class IO<A> implements Monad<A, IO<A>> {
+export default class IO<A> implements Monad<A, IO<A>> {
   constructor(private effect: () => A) {}
 
   runUnsafe(): A {

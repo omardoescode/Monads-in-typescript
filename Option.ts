@@ -1,4 +1,4 @@
-import { Monad } from "./Monad";
+import Monad from "./Monad";
 
 export abstract class Option<A> implements Monad<A, Option<any>> {
   abstract bind<B>(func: (value: A) => Option<B>): Option<B>;

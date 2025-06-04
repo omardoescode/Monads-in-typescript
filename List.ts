@@ -1,4 +1,5 @@
-import { Monad } from "./Monad";
+import Monad from "./Monad";
+
 export abstract class List<T> implements Monad<T, List<T>> {
   abstract bind<D>(func: (value: T) => List<D>): List<D>;
   abstract map<D>(func: (value: T) => D): List<D>;
@@ -10,6 +11,16 @@ export abstract class List<T> implements Monad<T, List<T>> {
     ifPair: (head: T, tail: List<T>) => D;
     ifEmpty: () => D;
   }): D;
+  abstract foreach(func: (value: T) => void): void;
+
+  static of<T>(...args: T[]): List<T> {
+    function build_list(args: T[]): List<T> {
+      if (args.length == 0) return Empty.get<T>();
+      return new Pair(args[0], build_list(args.slice(1)));
+    }
+
+    return build_list(args);
+  }
 }
 
 export class Pair<T> extends List<T> {
@@ -49,6 +60,10 @@ export class Pair<T> extends List<T> {
   match<D>({ ifPair }: { ifPair: (head: T, tail: List<T>) => D }): D {
     return ifPair(this.head, this.tail);
   }
+  foreach(func: (value: T) => void): void {
+    func(this.head);
+    this.tail.foreach(func);
+  }
 }
 
 export class Empty<T> extends List<T> {
@@ -82,4 +97,5 @@ export class Empty<T> extends List<T> {
   match<D>({ ifEmpty }: { ifEmpty: () => D }): D {
     return ifEmpty();
   }
+  foreach(_func: (value: T) => void): void {}
 }

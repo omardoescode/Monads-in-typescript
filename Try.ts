@@ -1,4 +1,4 @@
-import { Monad } from "./Monad";
+import Monad from "./Monad";
 
 export abstract class Try<A, E = unknown> implements Monad<A, Try<any, E>> {
   abstract bind<B>(func: (value: A) => Try<B, E>): Try<B, E>;

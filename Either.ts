@@ -1,4 +1,4 @@
-import { Monad } from "./Monad";
+import Monad from "./Monad";
 import { Option } from "./Option";
 
 export abstract class Either<L, R> implements Monad<R, Either<L, R>> {
@@ -68,7 +68,7 @@ export class Left<L, R> extends Either<L, R> {
   orElse(fallback: () => Either<L, R>): Either<L, R> {
     return fallback();
   }
-  ensure(left: L): (predicate: (value: R) => boolean) => Either<L, R> {
+  ensure(_left: L): (predicate: (value: R) => boolean) => Either<L, R> {
     return (_predicate) => this;
   }
 }
