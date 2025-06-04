@@ -1,7 +1,7 @@
 import Monad from "./Monad";
-import { Option } from "./Option";
+import Option from "./Option";
 
-export abstract class Either<L, R> implements Monad<R, Either<L, R>> {
+export default abstract class Either<L, R> implements Monad<R, Either<L, R>> {
   abstract bind<T>(func: (value: R) => Either<L, T>): Either<L, T>;
   abstract match<D>(cond: {
     ifLeft: (value: L) => D;

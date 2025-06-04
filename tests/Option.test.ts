@@ -1,4 +1,4 @@
-import { None, Option } from "../Option";
+import Option, { isNone, isSome, None } from "../Option";
 import { expect, test } from "@jest/globals";
 
 const ThrowFailedBranchError = () => {
@@ -54,7 +54,7 @@ test("Test None", () => {
 
   expect(value).toBe(none_number);
 
-  let new_value = value.bind((_value) => Option.pure("hello"));
+  let new_value = none_number.bind((_value) => Option.pure("hello"));
   expect(new_value).toBe(None.get<string>());
 });
 
@@ -87,4 +87,9 @@ test("getOrElse", () => {
 
   expect(pure.getOrElse(alternative)).toEqual(actual);
   expect(none_number.getOrElse(alternative)).toEqual(alternative);
+});
+
+test("fromNullable", () => {
+  expect(isNone(Option.fromNullable(null))).toEqual(true);
+  expect(isSome(Option.fromNullable(234))).toEqual(true);
 });

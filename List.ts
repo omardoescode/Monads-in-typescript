@@ -1,6 +1,6 @@
 import Monad from "./Monad";
 
-export abstract class List<T> implements Monad<T, List<T>> {
+export default abstract class List<T> implements Monad<T, List<T>> {
   abstract bind<D>(func: (value: T) => List<D>): List<D>;
   abstract map<D>(func: (value: T) => D): List<D>;
   abstract filter(func: (value: T) => boolean): List<T>;

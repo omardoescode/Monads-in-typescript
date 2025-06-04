@@ -1,10 +1,11 @@
 import Monad from "./Monad";
+import util from "util";
 
 /**
  * Represents an optional value: every `Option` is either `Some` and contains a value,
  * or `None`, and does not. Inspired by functional programming idioms.
  */
-export abstract class Option<A> implements Monad<A, Option<any>> {
+export default abstract class Option<A> implements Monad<A, Option<any>> {
   /**
    * Applies a function to the wrapped value and flattens the result.
    * @param func Function to apply to the wrapped value.
@@ -19,6 +20,20 @@ export abstract class Option<A> implements Monad<A, Option<any>> {
   abstract match<D>(cond: { ifSome: (value: A) => D; ifNone: () => D }): D;
 
   /**
+   * Customizes the string representation of this instance when inspected by
+   * Node.js `util.inspect` (used by `console.log` and debugging tools).
+   *
+   * This method is called automatically when the object is logged or inspected,
+   * allowing you to provide a more readable and meaningful output instead of the
+   * default object representation.
+   *
+   * @returns {string} A human-readable string describing the instance.
+   *
+   * @see https://nodejs.org/api/util.html#custom-inspection-functions-on-objects
+   */
+  abstract [util.inspect.custom](): string;
+
+  /**
    * Maps a function over the `Option`, preserving the structure.
    * @param func Function to apply to the value if `Some`.
    * @returns A new `Option` containing the result, or `None`.
@@ -30,7 +45,8 @@ export abstract class Option<A> implements Monad<A, Option<any>> {
   /**
    * Wraps a value in a `Some`.
    * @param value Value to wrap.
-   * @returns A `Some` containing the given value.
+   * @returns A `Some` co
+   * ntaining the given value.
    */
   static pure<A>(value: A): Option<A> {
     return new Some(value);
@@ -52,6 +68,10 @@ export abstract class Option<A> implements Monad<A, Option<any>> {
    */
   orElse(fallback: () => Option<A>): Option<A> {
     return this.match({ ifSome: (_value) => this, ifNone: fallback });
+  }
+
+  static fromNullable<A>(value: A | null | undefined): Option<A> {
+    return value == null ? None.get<A>() : Option.pure(value);
   }
 }
 
@@ -79,6 +99,11 @@ export class Some<A> extends Option<A> {
    */
   match<D>({ ifSome }: { ifSome: (value: A) => D }): D {
     return ifSome(this.value);
+  }
+
+  /** @inheritdoc */
+  [util.inspect.custom]() {
+    return `Some(${this.value})`;
   }
 }
 
@@ -114,6 +139,11 @@ export class None<A> extends Option<A> {
    */
   match<D>({ ifNone }: { ifNone: () => D }): D {
     return ifNone();
+  }
+
+  /** @inheritdoc */
+  [util.inspect.custom]() {
+    return `None`;
   }
 }
 
