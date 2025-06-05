@@ -17,7 +17,6 @@ test("Writer Constructor", () => {
 
 test("Writer bind", () => {
   const rn = Math.random();
-  const alternative = -1;
   const msg = "Incremented the value by 1";
 
   const writer = Writer.of(rn, StringConcatMonoid).bind((value, make) =>
@@ -27,6 +26,14 @@ test("Writer bind", () => {
   expect(writer.value).toEqual(rn + 1);
 });
 
+test("Writer map", () => {
+  const rn = Math.random();
+
+  const writer = Writer.of(rn, StringConcatMonoid).map((value) => value + 1);
+
+  expect(writer.log).toEqual(StringConcatMonoid.pure);
+  expect(writer.value).toEqual(rn + 1);
+});
 test("Writer Add Logs", () => {
   const rn = Math.random();
   const arr = Array.from({ length: 20 }, (_, i) => `TEST${i + 1}`);
