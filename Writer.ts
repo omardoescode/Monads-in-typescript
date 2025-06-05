@@ -26,16 +26,38 @@ export default class Writer<W, A> implements Monad<A, Writer<W, A>> {
   ) {}
 
   /**
-   * Chains the current computation with another `Writer`, combining logs via the monoid.
+   * Chains the current computation with another `Writer`, combining logs using the monoid.
    *
-   * @template B
-   * @param {(value: A) => Writer<W, B>} func - Function producing a new Writer from the current value.
-   * @returns {Writer<W, B>}
+   * This method allows you to sequence computations that produce both a value and a log,
+   * while automatically managing log accumulation using the provided monoid instance.
+   *
+   * The provided `make` helper function ensures that new `Writer` instances are created
+   * with the correct monoid, so you don't have to pass the monoid manually.
+   *
+   * @template B - The type of the resulting value after applying `func`.
+   * @param {(value: A, make: <T>(value: T, log: W) => Writer<W, T>) => Writer<W, B>} func
+   * A function that takes the current value and a helper `make` function to produce the next Writer.
+   *
+   * @returns {Writer<W, B>} A new Writer with the result value and accumulated log.
+   *
+   * @example
+   * const writer = Writer.of(2, StringConcatMonoid)
+   *   .bind((value, make) => make(value + 3, "Added 3\n"))
+   *   .bind((value, make) => make(value * 2, "Doubled\n"));
+   *
+   * console.log(writer.value); // 10
+   * console.log(writer.log);   // "Added 3\nDoubled\n"
    */
-  bind<B>(func: (value: A) => Writer<W, B>): Writer<W, B> {
-    const result = func(this.value);
-    const log = this.monoid.combine(this.log, result.log);
-    return new Writer<W, B>(result.value, log, this.monoid);
+  bind<B>(
+    func: (
+      value: A,
+      make: <T>(value: T, log: W) => Writer<W, T>,
+    ) => Writer<W, B>,
+  ): Writer<W, B> {
+    const make = <T>(value: T, log: W) => new Writer(value, log, this.monoid);
+    const result = func(this.value, make);
+    const combinedLog = this.monoid.combine(this.log, result.log);
+    return new Writer(result.value, combinedLog, this.monoid);
   }
 
   /**

@@ -3,7 +3,7 @@ export default interface Monoid<A> {
   pure: A;
 }
 
-export const StringLog: Monoid<string> = {
+export const StringConcatMonoid: Monoid<string> = {
   combine(x: string, y: string): string {
     return x + y;
   },
