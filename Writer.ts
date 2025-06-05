@@ -97,4 +97,13 @@ export default class Writer<W, A> implements Monad<A, Writer<W, A>> {
     const newLog = this.monoid.combine(this.log, log);
     return new Writer<W, A>(this.value, newLog, this.monoid);
   }
+
+  /**
+   * Returns both the value encapsulated in the writer, and the log
+   *
+   * returns {[A, W]}
+   */
+  run(): [A, W] {
+    return [this.value, this.log];
+  }
 }
