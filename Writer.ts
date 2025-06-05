@@ -1,3 +1,4 @@
+import assert from "assert";
 import Monad from "./Monad";
 import Monoid from "./Monoid";
 
@@ -56,6 +57,9 @@ export default class Writer<W, A> implements Monad<A, Writer<W, A>> {
   ): Writer<W, B> {
     const make = <T>(value: T, log: W) => new Writer(value, log, this.monoid);
     const result = func(this.value, make);
+
+    assert(result.monoid === this.monoid, "Must have the same monoid");
+
     const combinedLog = this.monoid.combine(this.log, result.log);
     return new Writer(result.value, combinedLog, this.monoid);
   }
