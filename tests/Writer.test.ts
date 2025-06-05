@@ -1,6 +1,6 @@
 import { expect, test } from "@jest/globals";
 import Writer from "../Writer";
-import Monoid, { StringConcatMonoid } from "../Monoid";
+import Monoid, { ListMonoid, StringConcatMonoid } from "../Monoid";
 
 const lastLogOnlyMonoid: Monoid<string> = {
   pure: "",
@@ -45,4 +45,30 @@ test("Writer Add Logs", () => {
 
   expect(writer.value).toEqual(rn);
   expect(writer.log).toBe(finalLog);
+});
+
+test("Writer Complex Example: Factorial", () => {
+  const temp = (n: number, value: string) => `Fac(${n})=${value}`;
+
+  function factorial(n: number): Writer<string[], number> {
+    if (n == 1) return Writer.of(1, ListMonoid<string>()).tell([temp(1, "1")]);
+
+    return factorial(n - 1).bind((prev, make) =>
+      make(prev * n, [temp(n, `${prev * n}`)]),
+    );
+  }
+
+  const n = 5;
+  const result = factorial(n);
+  // Dynamically compute expected log
+
+  const expectedLog: string[] = [];
+  let acc = 1;
+  for (let i = 1; i <= n; i++) {
+    acc *= i;
+    expectedLog.push(temp(i, `${acc}`));
+  }
+
+  expect(result.value).toEqual(acc);
+  expect(result.log).toEqual(expectedLog);
 });
